@@ -1,0 +1,104 @@
+Set up a Supabase backend to power the B‑View Expense Tracker web extension. It should provide secure storage, authentication, and APIs for expense recording, categorization, search, reporting, and export.
+
+🔑 Core Requirements
+Database (Postgres on Supabase)
+
+Create expenses table with fields:
+
+id (UUID, PK)
+
+date (DATE)
+
+amount (DECIMAL)
+
+currency (VARCHAR)
+
+vendor (VARCHAR)
+
+category (ENUM: Salaries, Utilities, Feeding, etc.)
+
+department (VARCHAR)
+
+description (TEXT)
+
+payment_method (ENUM: Cash, Bank Transfer, POS)
+
+person_responsible (VARCHAR)
+
+document_url (TEXT, Supabase Storage reference)
+
+created_at (TIMESTAMP, default now())
+
+created_by (UUID, FK to auth.users)
+
+updated_at (TIMESTAMP)
+
+updated_by (UUID, FK to auth.users)
+
+Create audit_log table with fields:
+
+id (UUID, PK)
+
+expense_id (UUID, FK to expenses)
+
+action (VARCHAR: Create, Update, Delete)
+
+timestamp (TIMESTAMP, default now())
+
+user_id (UUID, FK to auth.users)
+
+Authentication
+
+Use Supabase Auth for role‑based access (Admin, Finance Officer, Auditor).
+
+Restrict expense creation/update to authorized roles.
+
+Storage
+
+Supabase Storage bucket for receipts/invoices.
+
+Link uploaded files to document_url in expenses.
+
+APIs (Supabase Functions or Edge Functions)
+
+POST /expenses → Save new expense.
+
+GET /expenses → Search/filter expenses (query params: date, category, vendor, department).
+
+GET /expenses/{id} → Retrieve single expense.
+
+PUT /expenses/{id} → Update expense.
+
+DELETE /expenses/{id} → Soft delete with audit log.
+
+GET /summaries → Generate summaries (daily, monthly, yearly, by department/category).
+
+GET /export/pdf → Generate PDF statement.
+
+GET /export/excel → Export to Excel.
+
+Audit Trail
+
+Every API call logs an entry in audit_log.
+
+Immutable records for compliance.
+
+⚙️ Tech Stack
+Backend: Supabase (Postgres + Auth + Storage).
+
+Functions: Supabase Edge Functions (Node.js/TypeScript).
+
+Extension Integration: REST API calls from the web extension.
+
+Reporting: Use Supabase SQL queries for summaries.
+
+Exports: Generate PDF/Excel via Edge Functions.
+
+🚀 Deliverables
+Supabase project with database schema + storage bucket.
+
+Auth roles configured.
+
+Edge Functions for expense APIs.
+
+Documentation for extension developers (API endpoints + auth flow).

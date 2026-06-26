@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "B-View Expense Tracker"
+version = "1.0.0"
+id = "artifacts/b-view"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24535
+
+[services.development]
+run = "pnpm --filter @workspace/b-view run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/b-view", "run", "build" ]
+publicDir = "artifacts/b-view/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24535"
+BASE_PATH = "/"

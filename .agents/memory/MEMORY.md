@@ -1,0 +1,3 @@
+- [Orval mutation calling convention](orval-mutation-convention.md) — Orval-generated mutations wrap body in `{ data: Body }`, not passed directly
+- [bcryptjs vs bcrypt](bcryptjs-environment.md) — use bcryptjs (pure JS) in this project; native bcrypt fails in Replit
+- [API server PORT default](api-server-port.md) — API server defaults to 8080 via `${PORT:-8080}`; stale processes must be killed before workflow restart
