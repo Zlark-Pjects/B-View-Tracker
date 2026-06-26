@@ -1,3 +1,5 @@
 - [Orval mutation calling convention](orval-mutation-convention.md) — Orval-generated mutations wrap body in `{ data: Body }`, not passed directly
 - [bcryptjs vs bcrypt](bcryptjs-environment.md) — use bcryptjs (pure JS) in this project; native bcrypt fails in Replit
 - [API server PORT default](api-server-port.md) — API server defaults to 8080 via `${PORT:-8080}`; stale processes must be killed before workflow restart
+- [Clerk auth migration](clerk-auth.md) — Clerk replaces JWT; cookie-based sessions, JIT user provisioning from Clerk email to DB, in-memory cache with 5-min TTL.
+- [Workflow port management](workflow-ports.md) — Two sets of workflows exist; always restart the `artifacts/*` ones (they own the ports). The duplicate named workflows will fail with EADDRINUSE.

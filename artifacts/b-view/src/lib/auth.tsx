@@ -1,12 +1,10 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { useGetMe, User, setAuthTokenGetter } from "@workspace/api-client-react";
-import { useLocation } from "wouter";
+import { createContext, useContext, ReactNode } from "react";
+import { useAuth as useClerkAuth, useClerk } from "@clerk/react";
+import { useGetMe, type User } from "@workspace/api-client-react";
 import { Loader2 } from "lucide-react";
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  login: (token: string, user: User) => void;
   logout: () => void;
   isLoading: boolean;
 }
@@ -14,44 +12,24 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("bview_token"));
-  const [, setLocation] = useLocation();
+  const { isSignedIn, isLoaded: clerkLoaded } = useClerkAuth();
+  const { signOut } = useClerk();
 
-  // Set the global getter so customFetch can attach the token
-  useEffect(() => {
-    setAuthTokenGetter(() => localStorage.getItem("bview_token"));
-  }, []);
-
-  const { data: user, isLoading, isError } = useGetMe({
+  const { data: user, isLoading: userLoading } = useGetMe({
     query: {
       queryKey: ["/api/auth/me"],
-      enabled: !!token,
+      enabled: !!isSignedIn,
       retry: false,
-    }
+    },
   });
 
-  useEffect(() => {
-    if (isError) {
-      setToken(null);
-      localStorage.removeItem("bview_token");
-      setLocation("/login");
-    }
-  }, [isError, setLocation]);
-
-  const login = (newToken: string, user: User) => {
-    setToken(newToken);
-    localStorage.setItem("bview_token", newToken);
-    setLocation("/");
-  };
-
   const logout = () => {
-    setToken(null);
-    localStorage.removeItem("bview_token");
-    setLocation("/login");
+    signOut();
   };
 
-  // Only show children when we're sure about auth state
-  if (token && isLoading) {
+  const isLoading = !clerkLoaded || (!!isSignedIn && userLoading);
+
+  if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -60,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user: user || null, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user: user ?? null, logout, isLoading: false }}>
       {children}
     </AuthContext.Provider>
   );
@@ -68,8 +46,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 }

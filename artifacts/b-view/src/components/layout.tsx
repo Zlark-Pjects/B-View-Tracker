@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
-import { useLogout } from "@workspace/api-client-react";
 import { LayoutDashboard, Receipt, History, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,16 +14,7 @@ const NAV_ITEMS = [
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
-  const { user, logout: clearAuth } = useAuth();
-  const logoutMutation = useLogout();
-
-  const handleLogout = () => {
-    logoutMutation.mutate(undefined, {
-      onSettled: () => {
-        clearAuth();
-      }
-    });
-  };
+  const { user, logout } = useAuth();
 
   return (
     <div className="flex h-screen bg-background">
@@ -41,7 +31,9 @@ export function MainLayout({ children }: { children: ReactNode }) {
 
         <nav className="flex-1 px-4 py-6 space-y-2">
           {NAV_ITEMS.map((item) => {
-            const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+            const isActive =
+              location === item.href ||
+              (item.href !== "/" && location.startsWith(item.href));
             return (
               <Link key={item.href} href={item.href}>
                 <span
@@ -66,7 +58,13 @@ export function MainLayout({ children }: { children: ReactNode }) {
               <span className="text-sm font-medium">{user?.name}</span>
               <span className="text-xs text-sidebar-foreground/60">{user?.role}</span>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-sidebar-foreground/60 hover:text-sidebar-foreground">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={logout}
+              className="text-sidebar-foreground/60 hover:text-sidebar-foreground"
+              title="Sign out"
+            >
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -74,9 +72,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto">{children}</main>
     </div>
   );
 }
